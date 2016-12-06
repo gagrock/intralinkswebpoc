@@ -2,6 +2,7 @@ package com.metricstream.intralinkswebpoc.controller;
 
 import java.io.IOException;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -37,6 +38,19 @@ public class RedirectController extends HttpServlet {
 	public static String driveScope ="https://www.googleapis.com/auth/drive";
 	public static String tokenUrl ="https://accounts.google.com/o/oauth2/token";
 	public static String AllDocsURL ="https://www.googleapis.com/drive/v2/files";
+	
+	
+	@Override
+	public void init(ServletConfig config) throws ServletException {
+		// TODO Auto-generated method stub
+		super.init(config);
+		System.out.println("init called.. lets read the property file");
+		
+		
+		
+		
+	}
+	
 	
 	
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
