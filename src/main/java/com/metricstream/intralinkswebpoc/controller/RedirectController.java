@@ -1,29 +1,29 @@
 package com.metricstream.intralinkswebpoc.controller;
 
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.Map;
 
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.apache.oltu.oauth2.client.OAuthClient;
 import org.apache.oltu.oauth2.client.URLConnectionClient;
 import org.apache.oltu.oauth2.client.request.OAuthClientRequest;
-import org.apache.oltu.oauth2.client.request.OAuthClientRequest.OAuthRequestBuilder;
-import org.apache.oltu.oauth2.client.response.GitHubTokenResponse;
 import org.apache.oltu.oauth2.client.response.OAuthAccessTokenResponse;
 import org.apache.oltu.oauth2.client.response.OAuthAuthzResponse;
-import org.apache.oltu.oauth2.client.response.OAuthJSONAccessTokenResponse;
+import org.apache.oltu.oauth2.common.OAuth;
 import org.apache.oltu.oauth2.common.OAuthProviderType;
-import org.apache.oltu.oauth2.common.error.OAuthError.TokenResponse;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
-import org.apache.oltu.oauth2.common.message.OAuthResponse;
 import org.apache.oltu.oauth2.common.message.types.GrantType;
+
 
 
 public class RedirectController extends HttpServlet {
@@ -36,42 +36,60 @@ public class RedirectController extends HttpServlet {
 	public static String redirectUrl = "http://localhost:8080/intralinkswebpoc/authredirect";
 	public static String driveScope ="https://www.googleapis.com/auth/drive";
 	public static String tokenUrl ="https://accounts.google.com/o/oauth2/token";
+	public static String AllDocsURL ="https://www.googleapis.com/drive/v2/files";
 	
 	
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 	
 	    
-		try {
-			OAuthClient client = new OAuthClient(new URLConnectionClient());
-			OAuthAuthzResponse oar = OAuthAuthzResponse.oauthCodeAuthzResponse(request);
-		
-			OAuthClientRequest authReq = OAuthClientRequest
-						.tokenProvider(OAuthProviderType.GOOGLE)
-						.setParameter("access_token", "")
-						.setCode(oar.getCode())
-						
-						.buildQueryMessage();
+		OAuthClient authclient = new OAuthClient(new URLConnectionClient());
+		OAuthAuthzResponse oar;
+	  	try {
+			oar = OAuthAuthzResponse.oauthCodeAuthzResponse(request);
+			OAuthClientRequest clientRequest = OAuthClientRequest
+					.tokenProvider(OAuthProviderType.GOOGLE)
+					.setGrantType(GrantType.AUTHORIZATION_CODE)
+					.setCode(oar.getCode())
+					.setClientId(clientID)
+					.setClientSecret(clientSecret)
+					.setRedirectURI(redirectUrl)
+					//.setParameter("access_type", "offline")
+					//.setParameter("approval_prompt", "force")
+					.buildBodyMessage();
 			
-			System.out.println(authReq.getLocationUri());
-			System.out.println(authReq.getBody());
-		    Map<String, String> headers = authReq.getHeaders();
-		    for (Map.Entry<String, String> entry : headers.entrySet())
-		    {
-		        System.out.println(entry.getKey() + " :" + entry.getValue() +" \n");
-		    }
+			OAuthAccessTokenResponse oAuthResponse = authclient.accessToken(clientRequest, OAuth.HttpMethod.POST);
+			String appkey = "Bearer " + oAuthResponse.getAccessToken();
+			String refreshToken = oAuthResponse.getRefreshToken();
 			
-		  String accessToken = client
-				  .accessToken(authReq, GitHubTokenResponse.class)
-				  .getAccessToken();  
-		  System.out.println("Access Token "+accessToken);
+			System.out.println("Access Token: "+appkey);
+			System.out.println("refreshToken: "+refreshToken);
 			
-		} catch (OAuthSystemException e) {
+			
+			Client client = ClientBuilder.newClient();
+			WebTarget target = client.target(AllDocsURL);
+			
+			Invocation.Builder builder = target.request(MediaType.APPLICATION_JSON_TYPE)
+								.header("Authorization", appkey);
+			
+			
+			Response resp = builder.get();
+			
+			System.out.println(resp.getStatus());
+			System.out.println(resp.readEntity(String.class));
+			
+			
+			
+			
+			
+		} catch (OAuthProblemException | OAuthSystemException e) {
 			// TODO Auto-generated catch block
-			System.err.println(e.getMessage());
-		} catch (OAuthProblemException e) {
-			// TODO Auto-generated catch block
-			System.err.println(e.getMessage());
+			e.printStackTrace();
 		}
-	
+		
+		
+		
+		
+		
+		
 	}
 }
