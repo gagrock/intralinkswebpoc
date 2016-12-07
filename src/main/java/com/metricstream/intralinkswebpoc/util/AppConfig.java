@@ -19,6 +19,7 @@ public class AppConfig {
 	private String redirectUrl;
 	private String scope;
 	private String filesEndPoint;
+	private String uploadEndPoint;
 	
 	
    public void  loadProperties(ServletConfig config){
@@ -31,6 +32,7 @@ public class AppConfig {
 		    this.setRedirectUrl(prop.getProperty("redirectUrl"));
 		    this.setScope(prop.getProperty("scope"));
 		    this.setFilesEndPoint(prop.getProperty("filesUrl"));
+		    this.setUploadEndPoint(prop.getProperty("uploadUrl"));
 		    
 		    config.getServletContext().setAttribute("config", this);
 		 } catch (Exception e) {
@@ -39,7 +41,17 @@ public class AppConfig {
 	  
     }
    	
-  
+      
+		public String getUploadEndPoint() {
+			return uploadEndPoint;
+		}
+		
+		
+		private void setUploadEndPoint(String uploadEndPoint) {
+			this.uploadEndPoint = uploadEndPoint;
+		}
+
+
 		public String getFilesEndPoint() {
 			return filesEndPoint;
 		}

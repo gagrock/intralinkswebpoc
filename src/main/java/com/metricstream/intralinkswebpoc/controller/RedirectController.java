@@ -47,12 +47,12 @@ public class RedirectController extends HttpServlet {
 			session.setAttribute("accessToken","Bearer " + oAuthResponse.getAccessToken());
 			session.setAttribute("refreshToken",oAuthResponse.getRefreshToken());
 			
-			System.out.println("Access Token: "+request.getAttribute("accessToken"));
-			System.out.println("refreshToken: "+request.getAttribute("refreshToken"));
+			System.out.println("Access Token: "+session.getAttribute("accessToken"));
+			System.out.println("refreshToken: "+session.getAttribute("refreshToken"));
 			System.out.println("expiry "+oAuthResponse.getExpiresIn() );
 			System.out.println("oAuthToken "+oAuthResponse.getOAuthToken().getRefreshToken());
 			
-		   request.getRequestDispatcher("files").forward(request, response);
+		  // request.getRequestDispatcher("files").forward(request, response);
 			
 		} catch (OAuthProblemException | OAuthSystemException e) {
 			// TODO Auto-generated catch block
