@@ -1,33 +1,101 @@
 package com.metricstream.intralinkswebpoc.util;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.Properties;
 
+import javax.servlet.ServletConfig;
+
+import com.fasterxml.jackson.core.util.VersionUtil;
+
+/**
+ * @author irshad.sheikh
+ *
+ */
 public class AppConfig {
+
+	private final String fileName ="/app.properties";
 	
 	private String clientId;
 	private String clientSecret;
-	private String accessToken;
-	private String refreshToken;
-	private final String fileName ="app.properties";
+	private String redirectUrl;
+	private String scope;
+	private String filesEndPoint;
 	
-   public Properties  loadProperties(){
-	   InputStream inStream = null;
-	   Properties prop = new Properties(); 
-	   
+	
+   public void  loadProperties(ServletConfig config){
+	  
+	   Properties prop = new Properties();    
 	   try{
-		   inStream = new FileInputStream(fileName);	
-		   
-		   prop.load(inStream);
-			} catch (Exception e) {
-				e.printStackTrace();
-				
-			}
-	   
-	   
-	   return prop;
-   }	
+		    prop.load(VersionUtil.class.getResourceAsStream(fileName));
+		    this.setClientId(prop.getProperty("clientId"));
+		    this.setClientSecret(prop.getProperty("clientSecret"));
+		    this.setRedirectUrl(prop.getProperty("redirectUrl"));
+		    this.setScope(prop.getProperty("scope"));
+		    this.setFilesEndPoint(prop.getProperty("filesUrl"));
+		    
+		    config.getServletContext().setAttribute("config", this);
+		 } catch (Exception e) {
+			 e.printStackTrace();
+		}
+	  
+    }
+   	
+  
+		public String getFilesEndPoint() {
+			return filesEndPoint;
+		}
+		
+		
+		private void setFilesEndPoint(String filesEndPoint) {
+			this.filesEndPoint = filesEndPoint;
+		}
+		
 
 
+
+		public String getScope() {
+			return scope;
+		}
+
+
+		private void setScope(String scope) {
+			this.scope = scope;
+		}
+
+
+		private void setClientId(String clientId) {
+			this.clientId = clientId;
+		}
+		
+		
+		private void setClientSecret(String clientSecret) {
+			this.clientSecret = clientSecret;
+		}
+		
+			
+
+		public String getRedirectUrl() {
+			return redirectUrl;
+		}
+
+
+		private void setRedirectUrl(String redirectUrl) {
+			this.redirectUrl = redirectUrl;
+		}
+
+
+		public String getClientId() {
+			return clientId;
+		}
+
+
+		public String getClientSecret() {
+			return clientSecret;
+		}
+
+
+		
+      
+   
+   
+   
 }
