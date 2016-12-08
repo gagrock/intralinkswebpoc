@@ -1,6 +1,8 @@
 package com.metricstream.intralinkswebpoc.controller;
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -13,18 +15,22 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Feature;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.glassfish.jersey.logging.LoggingFeature;
+import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 // ...
+import org.json.JSONObject;
 
 import com.metricstream.intralinkswebpoc.util.AppConfig;
 
 @WebServlet("/upload")
 public class Upload extends HttpServlet{
-	
+	Logger logger = Logger.getLogger(getClass().getName());
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
@@ -51,30 +57,41 @@ public class Upload extends HttpServlet{
 	
 	public Response upload(String accessToken,String endpoint) throws IOException
 	{
+		System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
+	
+
+		Feature feature = new LoggingFeature(logger, Level.INFO, null, null);
 		Client client = ClientBuilder
 				   .newBuilder()
 				   .register(MultiPartFeature.class)
+				   .register(feature)
 				   .build();
-			ClassLoader classLoader = getClass().getClassLoader();
-		    File uploadFile = new File(classLoader.getResource("/app.properties").getFile());
-			FileDataBodyPart filePart = new FileDataBodyPart("file",uploadFile );
-			FormDataMultiPart formDataMultiPart = new FormDataMultiPart();
-	
-			FormDataMultiPart multiPart = (FormDataMultiPart)formDataMultiPart
-										.field("title", uploadFile.getName())
-										.field("description", uploadFile.getName())
-										.bodyPart(filePart);
 		
 		WebTarget target = client.target(endpoint).queryParam("uploadType", "multipart");
-		System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
-		Invocation.Builder builder = target.request(multiPart.getMediaType())
-						    .header("Content-Type", "multipart/related")
-						    .header("Content-Length", uploadFile.length())
-							.header("Authorization", accessToken);
-		Response resp = builder.post(Entity.entity(multiPart, multiPart.getMediaType()));	
-		formDataMultiPart.close();
-		multiPart.close();
+		JSONObject obj = new JSONObject();
+		obj.put("name", "app.properties");
+		obj.put("originalFilename", "app.properties");
+	   
+		MultiPart multiPart = new MultiPart();
+		multiPart.bodyPart(obj, MediaType.APPLICATION_JSON_TYPE);
+		File uploadFile = new File(getClass().getClassLoader().getResource("/app.properties").getFile());
+		FileDataBodyPart fbdPart = new FileDataBodyPart(uploadFile.getName(), uploadFile, MediaType.TEXT_HTML_TYPE);
+		fbdPart.setName("app.txt");
+	
+		multiPart.bodyPart(fbdPart);
+		
+		
+		Invocation.Builder builder = target.request(MediaType.APPLICATION_JSON_TYPE);
+								.header("Content-Type", "multipart/related")
+							    .header("Content-Length", uploadFile.length())
+								.header("Authorization", accessToken);
+								Response resp = builder.post(Entity.entity(multiPart, multiPart.getMediaType()));
+															
+		
+		
+		
 		return resp;
+			
 		
 	}
 

@@ -16,7 +16,7 @@ import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 
 import com.metricstream.intralinkswebpoc.util.AppConfig;
 
-@WebServlet("/main")
+@WebServlet("/login")
 public class MainController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	
