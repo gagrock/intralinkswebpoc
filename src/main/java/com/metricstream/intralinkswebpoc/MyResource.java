@@ -1,9 +1,13 @@
 package com.metricstream.intralinkswebpoc;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 /**
  * Root resource (exposed at "myresource" path)
@@ -19,7 +23,16 @@ public class MyResource {
      */
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    public String getIt() {
-        return "Got it!";
+    public Response getIt() {
+    	
+    	URI uri = null;
+		try {
+			uri = new URI("http://www.imzah.com");
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+        return Response.seeOther(uri).build(); 
     }
 }
