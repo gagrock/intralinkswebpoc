@@ -16,6 +16,11 @@ import com.metricstream.intralinkswebpoc.util.RestClient;
 @WebServlet("/files")
 public class FileListController  extends HttpServlet {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
@@ -36,7 +41,7 @@ public class FileListController  extends HttpServlet {
 			System.out.println("for now redirecting to main");
 			response.sendRedirect("main");
 		}
-		
+		                   
 	}
 	
 }
