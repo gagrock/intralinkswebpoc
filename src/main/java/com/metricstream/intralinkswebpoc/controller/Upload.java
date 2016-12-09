@@ -1,6 +1,7 @@
 package com.metricstream.intralinkswebpoc.controller;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,6 +21,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.logging.LoggingFeature;
+import org.glassfish.jersey.media.multipart.ContentDisposition;
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
@@ -68,20 +70,26 @@ public class Upload extends HttpServlet{
 				   .build();
 		
 		WebTarget target = client.target(endpoint).queryParam("uploadType", "multipart");
+		
+		File uploadFile = new File(getClass().getClassLoader().getResource("/dpindex.html").getFile());
+		FileDataBodyPart fbdPart = new FileDataBodyPart(uploadFile.getName(), uploadFile);
 		JSONObject obj = new JSONObject();
-		obj.put("name", "app.properties");
-		obj.put("originalFilename", "app.properties");
+		obj.put("name", uploadFile.getName());
+		obj.put("originalFilename", uploadFile.getName());
+		obj.put("title", uploadFile.getName());
+		obj.put("mimeType", Files.probeContentType(uploadFile.toPath()));
+		obj.put("description", "homepage for pead");
+		
+
+		
+		
 	   
 		MultiPart multiPart = new MultiPart();
-		multiPart.bodyPart(obj, MediaType.APPLICATION_JSON_TYPE);
-		File uploadFile = new File(getClass().getClassLoader().getResource("/app.properties").getFile());
-		FileDataBodyPart fbdPart = new FileDataBodyPart(uploadFile.getName(), uploadFile, MediaType.TEXT_HTML_TYPE);
-		fbdPart.setName("app.txt");
-	
+		multiPart.bodyPart(obj.toString(), MediaType.APPLICATION_JSON_TYPE);
 		multiPart.bodyPart(fbdPart);
 		
 		
-		Invocation.Builder builder = target.request(MediaType.APPLICATION_JSON_TYPE);
+		Invocation.Builder builder = target.request(MediaType.APPLICATION_JSON_TYPE)
 								.header("Content-Type", "multipart/related")
 							    .header("Content-Length", uploadFile.length())
 								.header("Authorization", accessToken);
